@@ -17,14 +17,14 @@ repositories {
 group = "com.authzed.api"
 version = findProperty("release") ?: "0.0.0-SNAPSHOT"
 
-nexusPublishing { repositories { sonatype {
-  // If registered in Sonatype after 24 Feb 2021, you must explicitly configure these:
-  nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
-  snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
-}}}
+//nexusPublishing { repositories { sonatype {
+//  // If registered in Sonatype after 24 Feb 2021, you must explicitly configure these:
+//  nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+//  snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+//}}}
 
 publishing {
-  publications { authzed(MavenPublication) {
+  publications { mavenJava(MavenPublication) {
     from components.java
     pom {
       name = "authzed"
@@ -47,24 +47,18 @@ publishing {
     }
   }}
 
-  repositories { maven {
-    def releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-    def snapshotsRepoUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-    def ossrhUsername = findProperty("sonatypeUsername")
-    def ossrhPassword = findProperty("sonatypePassword")
-
-    name = "authzed"
-    url = project.hasProperty("release") ? releasesRepoUrl : snapshotsRepoUrl
-  }}
+  repositories {
+    mavenLocal()
+  }
 }
 
-signing {
-  def signingKey = findProperty("signingKey")
-  def signingPassword = findProperty("signingPassword")
-  useInMemoryPgpKeys(signingKey, signingPassword)
-
-  sign publishing.publications.authzed
-}
+//signing {
+//  def signingKey = findProperty("signingKey")
+//  def signingPassword = findProperty("signingPassword")
+//  useInMemoryPgpKeys(signingKey, signingPassword)
+//
+//  sign publishing.publications.authzed
+//}
 
 
 java {
@@ -96,7 +90,9 @@ sourceSets { main {
 }}
 
 dependencies {
-  implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+  implementation("io.grpc:grpc-protobuf:${grpcVersion}") {
+    exclude group: 'com.google.protobuf', module: 'protobuf-java'
+  }
   implementation "com.google.protobuf:protobuf-java:${protocVersion}"
   implementation "io.grpc:grpc-stub:${grpcVersion}"
   runtimeOnly "io.grpc:grpc-netty-shaded:${grpcVersion}"
